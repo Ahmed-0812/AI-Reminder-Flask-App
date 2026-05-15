@@ -285,7 +285,7 @@ function startVoice(){
 
 }
 
-// ================= NOTIFICATION PERMISSION =================
+// ================= REQUEST NOTIFICATION =================
 
 if (Notification.permission !== "granted") {
 
@@ -293,55 +293,33 @@ if (Notification.permission !== "granted") {
 
 }
 
-// ================= TASK DATA =================
+// ================= TASKS =================
 
 const tasks = [
 
 {% for task in tasks %}
 {
-    title: `{{ task.title }}`,
-    date: `{{ task.reminder_date }}`,
-    time: `{{ task.reminder_time }}`
+    title: "{{ task.title }}",
+    date: "{{ task.reminder_date }}",
+    time: "{{ task.reminder_time }}"
 },
 {% endfor %}
 
 ];
 
-// ================= BEEP SOUND =================
+// ================= TEST SOUND =================
 
 function playBeep(){
 
-    const audioContext =
-    new(window.AudioContext ||
-        window.webkitAudioContext)();
+    const audio = new Audio(
+    "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
+    );
 
-    const oscillator =
-    audioContext.createOscillator();
-
-    const gainNode =
-    audioContext.createGain();
-
-    oscillator.connect(gainNode);
-
-    gainNode.connect(audioContext.destination);
-
-    oscillator.type = "sine";
-
-    oscillator.frequency.value = 1000;
-
-    gainNode.gain.value = 0.5;
-
-    oscillator.start();
-
-    setTimeout(() => {
-
-        oscillator.stop();
-
-    }, 1000);
+    audio.play();
 
 }
 
-// ================= ALARM CHECK =================
+// ================= REMINDER ENGINE =================
 
 let alreadyTriggered = [];
 
@@ -349,56 +327,77 @@ setInterval(() => {
 
     const now = new Date();
 
+    // INDIA TIME
+    const indiaTime =
+    new Date(
+        now.toLocaleString(
+            "en-US",
+            { timeZone: "Asia/Kolkata" }
+        )
+    );
+
     const currentDate =
-    now.toISOString().split('T')[0];
+    indiaTime.toISOString().split('T')[0];
 
-   const currentTime =
-now.getHours().toString().padStart(2,'0')
-+ ":" +
-now.getMinutes().toString().padStart(2,'0');
-
-tasks.forEach(task => {
+    const currentTime =
+    indiaTime.getHours()
+    .toString()
+    .padStart(2,'0')
+    + ":" +
+    indiaTime.getMinutes()
+    .toString()
+    .padStart(2,'0');
 
     console.log(
-        "Checking:",
-        task.time,
+        "NOW:",
+        currentDate,
         currentTime
     );
 
-    const uniqueId =
-    task.title + task.date + task.time;
+    tasks.forEach(task => {
 
-    if(
-        task.date === currentDate &&
-        task.time.trim() === currentTime &&
-        !alreadyTriggered.includes(uniqueId)
-    ){
-
-        alreadyTriggered.push(uniqueId);
-
-        // PLAY SOUND
-        playBeep();
-
-        // ALERT
-        alert(
-            "🔔 Reminder: " + task.title
+        console.log(
+            "TASK:",
+            task.date,
+            task.time
         );
 
-        // NOTIFICATION
-        if(Notification.permission === "granted"){
+        const uniqueId =
+        task.title + task.date + task.time;
 
-            new Notification(
-                "⏰ Reminder Alert!",
-                {
-                    body: task.title
-                }
+        if(
+            task.date.trim() === currentDate &&
+            task.time.trim() === currentTime &&
+            !alreadyTriggered.includes(uniqueId)
+        ){
+
+            alreadyTriggered.push(uniqueId);
+
+            // SOUND
+            playBeep();
+
+            // POPUP
+            alert(
+                "🔔 Reminder: " + task.title
             );
+
+            // NOTIFICATION
+            if(Notification.permission === "granted"){
+
+                new Notification(
+                    "⏰ Reminder Alert!",
+                    {
+                        body: task.title,
+                        icon:
+                        "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
+                    }
+                );
+
+            }
 
         }
 
-    }
-
-});
+    });
 
 }, 1000);
 
