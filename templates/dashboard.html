@@ -285,6 +285,14 @@ function startVoice(){
 
 }
 
+// ================= NOTIFICATION PERMISSION =================
+
+if (Notification.permission !== "granted") {
+
+    Notification.requestPermission();
+
+}
+
 // ================= TASK DATA =================
 
 const tasks = [
@@ -326,7 +334,9 @@ function playBeep(){
     oscillator.start();
 
     setTimeout(() => {
+
         oscillator.stop();
+
     }, 1000);
 
 }
@@ -361,11 +371,24 @@ setInterval(() => {
             // PLAY SOUND
             playBeep();
 
-            // POPUP
+            // ALERT POPUP
             alert(
-                "🔔 Reminder: " +
-                task.title
+                "🔔 Reminder: " + task.title
             );
+
+            // BROWSER NOTIFICATION
+            if(Notification.permission === "granted"){
+
+                new Notification(
+                    "⏰ Reminder Alert!",
+                    {
+                        body: task.title,
+                        icon:
+                        "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
+                    }
+                );
+
+            }
 
         }
 
@@ -381,7 +404,9 @@ if ('serviceWorker' in navigator) {
     .register('/static/service-worker.js')
 
     .then(() => {
+
         console.log('PWA Ready');
+
     });
 
 }
