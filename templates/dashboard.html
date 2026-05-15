@@ -352,47 +352,53 @@ setInterval(() => {
     const currentDate =
     now.toISOString().split('T')[0];
 
-    const currentTime =
-    now.toTimeString().slice(0,5);
+   const currentTime =
+now.getHours().toString().padStart(2,'0')
++ ":" +
+now.getMinutes().toString().padStart(2,'0');
 
-    tasks.forEach(task => {
+tasks.forEach(task => {
 
-        const uniqueId =
-        task.title + task.date + task.time;
+    console.log(
+        "Checking:",
+        task.time,
+        currentTime
+    );
 
-        if(
-            task.date === currentDate &&
-            task.time === currentTime &&
-            !alreadyTriggered.includes(uniqueId)
-        ){
+    const uniqueId =
+    task.title + task.date + task.time;
 
-            alreadyTriggered.push(uniqueId);
+    if(
+        task.date === currentDate &&
+        task.time.trim() === currentTime &&
+        !alreadyTriggered.includes(uniqueId)
+    ){
 
-            // PLAY SOUND
-            playBeep();
+        alreadyTriggered.push(uniqueId);
 
-            // ALERT POPUP
-            alert(
-                "🔔 Reminder: " + task.title
+        // PLAY SOUND
+        playBeep();
+
+        // ALERT
+        alert(
+            "🔔 Reminder: " + task.title
+        );
+
+        // NOTIFICATION
+        if(Notification.permission === "granted"){
+
+            new Notification(
+                "⏰ Reminder Alert!",
+                {
+                    body: task.title
+                }
             );
-
-            // BROWSER NOTIFICATION
-            if(Notification.permission === "granted"){
-
-                new Notification(
-                    "⏰ Reminder Alert!",
-                    {
-                        body: task.title,
-                        icon:
-                        "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
-                    }
-                );
-
-            }
 
         }
 
-    });
+    }
+
+});
 
 }, 1000);
 
