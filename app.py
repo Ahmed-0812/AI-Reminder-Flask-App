@@ -39,6 +39,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
+        # Demo Login
         if username == "admin" and password == "1234":
             return redirect('/dashboard')
 
@@ -60,9 +61,7 @@ def dashboard():
     if request.method == 'POST':
 
         task_title = request.form['task']
-
         reminder_date = request.form['reminder_date']
-
         reminder_time = request.form['reminder_time']
 
         new_task = Task(
@@ -78,9 +77,12 @@ def dashboard():
 
     tasks = Task.query.all()
 
-    return render_template('dashboard.html', tasks=tasks)
+    return render_template(
+        'dashboard.html',
+        tasks=tasks
+    )
 
-# ================= DELETE =================
+# ================= DELETE TASK =================
 @app.route('/delete/<int:id>')
 def delete(id):
 
@@ -92,6 +94,6 @@ def delete(id):
 
     return redirect('/dashboard')
 
-# ================= RUN =================
+# ================= RUN APP =================
 if __name__ == '__main__':
     app.run(debug=True)
